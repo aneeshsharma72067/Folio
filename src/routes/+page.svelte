@@ -356,8 +356,28 @@
 		.divider {
 			display: none;
 		}
+		/* Toolbar: zones shrink to content, center flexes into the gap, title ellipsizes. */
+		.left,
+		.right {
+			flex: 0 0 auto;
+			gap: 4px;
+		}
+		.center {
+			flex: 1 1 auto;
+			min-width: 0;
+			align-items: flex-start;
+			padding: 0 10px;
+		}
 		.center h1 {
-			max-width: 38vw;
+			max-width: 100%;
+		}
+		/* Compact zoom: keep ± controls, drop the % readout to reclaim width. */
+		.zlevel {
+			display: none;
+		}
+		.zoom {
+			padding: 3px 4px;
+			gap: 2px;
 		}
 		.panel-toggle {
 			display: flex;
