@@ -229,7 +229,7 @@
 		height: 100%;
 		overflow-y: auto;
 		overflow-x: hidden;
-		padding: 24px 24px 80px;
+		padding: 24px 24px calc(80px + env(safe-area-inset-bottom));
 		position: relative;
 		scroll-behavior: smooth;
 		background:

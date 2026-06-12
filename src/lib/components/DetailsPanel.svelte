@@ -389,6 +389,7 @@
 	.bottom {
 		flex-shrink: 0;
 		padding: 14px;
+		padding-bottom: calc(14px + env(safe-area-inset-bottom));
 		border-top: 1px solid rgba(255, 255, 255, 0.06);
 		background: rgba(12, 12, 13, 0.7);
 		backdrop-filter: blur(12px);
@@ -557,5 +558,22 @@
 		font-size: 11px;
 		color: rgba(255, 255, 255, 0.25);
 		margin-left: 2px;
+	}
+
+	/* Touch: ≥44px tap targets without changing visual density (glyph centered in padded box). */
+	@media (pointer: coarse) {
+		.mini {
+			min-width: 44px;
+			min-height: 44px;
+			margin: -12px -10px;
+			padding: 12px;
+		}
+		.head-right {
+			gap: 0;
+		}
+		.tab {
+			padding-bottom: 16px;
+			padding-top: 4px;
+		}
 	}
 </style>

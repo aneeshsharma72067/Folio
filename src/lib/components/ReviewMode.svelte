@@ -108,6 +108,8 @@
 		justify-content: center;
 		z-index: 100;
 		padding: 24px;
+		padding-top: calc(24px + env(safe-area-inset-top));
+		padding-bottom: calc(24px + env(safe-area-inset-bottom));
 		animation: fade 0.2s ease;
 	}
 	@keyframes fade {
@@ -276,5 +278,23 @@
 		font-size: 13px;
 		font-weight: 500;
 		cursor: pointer;
+	}
+
+	@media (max-width: 480px) {
+		.overlay {
+			padding-left: 16px;
+			padding-right: 16px;
+		}
+		.card {
+			min-height: 200px;
+			padding: 20px;
+		}
+		.grades {
+			gap: 6px;
+		}
+		.grade {
+			font-size: 12px;
+			padding: 14px 0;
+		}
 	}
 </style>

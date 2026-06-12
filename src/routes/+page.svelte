@@ -13,6 +13,31 @@
 	let reviewing = $state(false);
 	let viewer = $state<PdfViewer | null>(null);
 
+	// Mobile bottom-sheet (panel) state — local to reader, no PDF render-path impact.
+	let sheetOpen = $state(false);
+	let sheetEl = $state<HTMLElement | null>(null);
+	let dragging = false;
+	let dragStartY = 0;
+	let dragY = $state(0);
+
+	function onHandleDown(e: PointerEvent) {
+		dragging = true;
+		dragStartY = e.clientY;
+		dragY = 0;
+		(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+	}
+	function onHandleMove(e: PointerEvent) {
+		if (!dragging) return;
+		dragY = Math.max(0, e.clientY - dragStartY);
+	}
+	function onHandleUp() {
+		if (!dragging) return;
+		dragging = false;
+		const h = sheetEl?.offsetHeight ?? 1;
+		if (dragY > h * 0.25) sheetOpen = false;
+		dragY = 0;
+	}
+
 	let notes = $state<NoteRecord[]>([]);
 	let highlights = $state<HighlightRecord[]>([]);
 	let flashcards = $state<FlashcardRecord[]>([]);
@@ -117,6 +142,15 @@
 				<button class="icon" onclick={() => goto(app.currentPage)} aria-label="Recenter" title="Recenter page">
 					<span class="material-symbols-outlined">filter_center_focus</span>
 				</button>
+				<button
+					class="icon panel-toggle"
+					class:active={sheetOpen}
+					onclick={() => (sheetOpen = !sheetOpen)}
+					aria-label="Notes panel"
+					title="Notes &amp; highlights"
+				>
+					<span class="material-symbols-outlined">edit_note</span>
+				</button>
 			</div>
 		</header>
 
@@ -127,7 +161,28 @@
 				{/if}
 			</section>
 			<div class="divider"></div>
-			<aside class="panel-col">
+			<div
+				class="sheet-backdrop"
+				class:show={sheetOpen}
+				onclick={() => (sheetOpen = false)}
+				role="presentation"
+			></div>
+			<aside
+				class="panel-col"
+				class:open={sheetOpen}
+				bind:this={sheetEl}
+				style={dragY ? `transform:translateY(${dragY}px);transition:none;` : ''}
+			>
+				<button
+					class="sheet-handle"
+					aria-label="Drag to close panel"
+					onpointerdown={onHandleDown}
+					onpointermove={onHandleMove}
+					onpointerup={onHandleUp}
+					onpointercancel={onHandleUp}
+				>
+					<span class="grabber"></span>
+				</button>
 				<DetailsPanel
 					{notes}
 					{highlights}
@@ -153,17 +208,29 @@
 		height: 100dvh;
 	}
 	.toolbar {
-		height: 52px;
+		height: calc(52px + env(safe-area-inset-top));
+		padding-top: env(safe-area-inset-top);
 		flex-shrink: 0;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 0 16px;
+		padding-left: calc(16px + env(safe-area-inset-left));
+		padding-right: calc(16px + env(safe-area-inset-right));
 		background: rgba(10, 10, 10, 0.8);
 		backdrop-filter: blur(20px);
 		-webkit-backdrop-filter: blur(20px);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 		z-index: 30;
+	}
+	/* Panel toggle: mobile-only (sheet trigger). */
+	.panel-toggle {
+		display: none;
+	}
+	.sheet-handle {
+		display: none;
+	}
+	.sheet-backdrop {
+		display: none;
 	}
 	.left,
 	.right {
@@ -277,23 +344,100 @@
 	}
 
 	@media (max-width: 880px) {
+		/* PDF goes full-screen; panel becomes a bottom sheet. */
 		.work {
 			flex-direction: column;
+			position: relative;
 		}
 		.pdf-col {
 			width: 100%;
-			height: 55%;
+			height: 100%;
 		}
 		.divider {
-			width: 100%;
-			height: 1px;
-		}
-		.panel-col {
-			width: 100%;
-			height: 45%;
+			display: none;
 		}
 		.center h1 {
-			max-width: 50vw;
+			max-width: 38vw;
+		}
+		.panel-toggle {
+			display: flex;
+		}
+
+		.sheet-backdrop {
+			display: block;
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.45);
+			backdrop-filter: blur(2px);
+			-webkit-backdrop-filter: blur(2px);
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity 0.25s ease;
+			z-index: 55;
+		}
+		.sheet-backdrop.show {
+			opacity: 1;
+			pointer-events: auto;
+		}
+
+		.panel-col {
+			position: fixed;
+			inset: auto 0 0 0;
+			width: 100%;
+			height: min(82dvh, 720px);
+			display: flex;
+			flex-direction: column;
+			transform: translateY(100%);
+			transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+			z-index: 60;
+			border-radius: 18px 18px 0 0;
+			overflow: hidden;
+			box-shadow: 0 -20px 50px -16px rgba(0, 0, 0, 0.7);
+		}
+		.panel-col.open {
+			transform: translateY(0);
+		}
+		.panel-col :global(.panel) {
+			flex: 1;
+			min-height: 0;
+			height: auto;
+		}
+
+		.sheet-handle {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 100%;
+			height: 28px;
+			flex-shrink: 0;
+			background: #0e0e0f;
+			border: none;
+			border-radius: 18px 18px 0 0;
+			cursor: grab;
+			touch-action: none;
+		}
+		.sheet-handle:active {
+			cursor: grabbing;
+		}
+		.grabber {
+			width: 38px;
+			height: 4px;
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.22);
+		}
+	}
+
+	/* Touch devices: bump tap targets to ≥44px (Apple HIG). */
+	@media (pointer: coarse) {
+		.icon {
+			width: 44px;
+			height: 44px;
+		}
+		.zoom {
+			padding: 6px 10px;
+		}
+		.zbtn {
+			padding: 6px;
 		}
 	}
 </style>

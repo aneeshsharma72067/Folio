@@ -127,7 +127,8 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 8vh 24px 60px;
+		padding: calc(8vh + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right))
+			calc(60px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left));
 		background: radial-gradient(120% 90% at 50% -10%, #18181b 0%, #0c0c0d 55%, #08080a 100%);
 		position: relative;
 	}
@@ -307,5 +308,35 @@
 	}
 	.drop-card .material-symbols-outlined {
 		font-size: 40px;
+	}
+
+	/* Touch: no hover to reveal the remove button — show it always. */
+	@media (hover: none) {
+		.del {
+			display: flex;
+		}
+	}
+
+	@media (max-width: 560px) {
+		.grid {
+			grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+			gap: 12px;
+		}
+		.recents {
+			margin-top: 40px;
+		}
+	}
+	@media (max-width: 420px) {
+		h1 {
+			font-size: 28px;
+		}
+		.tag {
+			font-size: 14px;
+		}
+	}
+	@media (max-height: 560px) {
+		.library {
+			padding-top: calc(4vh + env(safe-area-inset-top));
+		}
 	}
 </style>

@@ -45,7 +45,7 @@
 <style>
 	.toast {
 		position: fixed;
-		bottom: 20px;
+		bottom: calc(20px + env(safe-area-inset-bottom));
 		left: 50%;
 		transform: translateX(-50%);
 		display: flex;

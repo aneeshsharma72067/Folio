@@ -179,4 +179,19 @@
 			transform: translateY(-8px);
 		}
 	}
+
+	@media (pointer: coarse) {
+		.bar {
+			padding: 12px;
+		}
+		.x {
+			min-width: 40px;
+			min-height: 40px;
+			align-items: center;
+			justify-content: center;
+		}
+		.hit {
+			padding: 12px 10px;
+		}
+	}
 </style>
